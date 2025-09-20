@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Мои игры{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Мои игры</h1>
+            <p class="text-muted">Управляйте своими играми и просматривайте статистику</p>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-primary">{{ games.count }}</h3>
+                    <p class="card-text">Всего игр</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-success">{{ published_count }}</h3>
+                    <p class="card-text">Опубликовано</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-warning">{{ draft_count }}</h3>
+                    <p class="card-text">Черновики</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-info">{{ total_downloads|intcomma }}</h3>
+                    <p class="card-text">Скачиваний</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Действия -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <a href="{% url 'games:create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Добавить новую игру
+            </a>
+        </div>
+    </div>
+
+    <!-- Список игр -->
+    <div class="row">
+        {% for game in games %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                {% if game.cover_image %}
+                <img src="{{ game.cover_image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ game.title }}">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <span class="text-muted">Нет изображения</span>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ game.title }}</h5>
+                    <p class="card-text">{{ game.short_description|truncatechars:100 }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        {% if game.is_published %}
+                        <span class="badge bg-success">Опубликовано</span>
+                        {% else %}
+                        <span class="badge bg-warning">Черновик</span>
+                        {% endif %}
+                        <small class="text-muted">{{ game.download_count }} скачиваний</small>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'games:edit' game.slug %}" class="btn btn-outline-primary btn-sm">Редактировать</a>
+                        <a href="{% url 'games:detail' game.slug %}" class="btn btn-outline-secondary btn-sm">Просмотр</a>
+                        <a href="{% url 'games:delete' game.slug %}" class="btn btn-outline-danger btn-sm">Удалить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <h4>У вас пока нет игр</h4>
+                <p class="text-muted">Создайте свою первую игру, чтобы начать делиться ею с сообществом</p>
+                <a href="{% url 'games:create' %}" class="btn btn-primary">Добавить игру</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

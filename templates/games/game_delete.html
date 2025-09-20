@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Удалить {{ game.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Удаление игры</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Внимание!</strong> Это действие нельзя отменить.
+                    </div>
+                    
+                    <p>Вы действительно хотите удалить игру <strong>"{{ game.title }}"</strong>?</p>
+                    
+                    <div class="mb-3">
+                        {% if game.cover_image %}
+                        <img src="{{ game.cover_image.url }}" class="img-fluid rounded" style="max-height: 200px;" alt="{{ game.title }}">
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-muted">При удалении будут также удалены:</p>
+                    <ul class="text-muted">
+                        <li>Все файлы игры</li>
+                        <li>Все скриншоты</li>
+                        <li>Все отзывы и комментарии</li>
+                        <li>Статистика скачиваний</li>
+                    </ul>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Да, удалить игру
+                            </button>
+                            <a href="{% url 'games:edit' game.slug %}" class="btn btn-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

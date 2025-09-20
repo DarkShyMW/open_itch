@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Каталог игр{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Каталог игр</h1>
+            <p class="text-muted">Найдите интересные инди-игры от независимых разработчиков</p>
+        </div>
+    </div>
+
+    <!-- Поиск и фильтры -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form method="get" class="d-flex gap-3 align-items-end">
+                <div class="flex-grow-1">
+                    <label for="q" class="form-label">Поиск</label>
+                    <input type="text" class="form-control" name="q" id="q" 
+                           value="{{ request.GET.q }}" 
+                           placeholder="Поиск игр...">
+                </div>
+                <div>
+                    <label for="sort" class="form-label">Сортировка</label>
+                    <select name="sort" id="sort" class="form-select">
+                        <option value="">По умолчанию</option>
+                        <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Новые</option>
+                        <option value="-download_count" {% if request.GET.sort == '-download_count' %}selected{% endif %}>Популярные</option>
+                        <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>По алфавиту</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">Найти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Список игр -->
+    <div class="row">
+        {% for game in games %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card h-100">
+                {% if game.cover_image %}
+                <img src="{{ game.cover_image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ game.title }}">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <span class="text-muted">Нет изображения</span>
+                </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ game.title }}</h5>
+                    <p class="card-text text-muted small">{{ game.developer.username }}</p>
+                    <p class="card-text flex-grow-1">{{ game.short_description|truncatechars:100 }}</p>
+                    
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-success">Бесплатно</span>
+                            <small class="text-muted">{{ game.download_count }} скачиваний</small>
+                        </div>
+                        <a href="{% url 'games:detail' game.slug %}" class="btn btn-primary btn-sm w-100">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <h4>Игры не найдены</h4>
+                <p class="text-muted">Попробуйте изменить параметры поиска</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if is_paginated %}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Навигация по страницам">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">Назад</a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">Далее</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

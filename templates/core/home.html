@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Главная - {{ block.super }}{% endblock %}
+
+{% block content %}
+<!-- Герой-секция -->
+<section class="bg-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Добро пожаловать на {{ platform_name }}!</h1>
+                <p class="lead">{{ platform_tagline }}. Откройте для себя удивительные инди-игры или поделитесь своими творениями с миром.</p>
+                <div class="mt-4">
+                    <a href="{% url 'games:list' %}" class="btn btn-light btn-lg me-3">Найти игры</a>
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'accounts:register' %}" class="btn btn-outline-light btn-lg">Присоединиться</a>
+                    {% elif not user.is_developer %}
+                        <a href="{% url 'accounts:register' %}" class="btn btn-outline-light btn-lg">Стать разработчиком</a>
+                    {% else %}
+                        <a href="{% url 'games:create' %}" class="btn btn-outline-light btn-lg">Добавить игру</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-gamepad fa-10x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Статистика -->
+<section class="py-3 mb-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <h3 class="fw-bold text-primary">{{ stats.total_games|intcomma }}</h3>
+                <p class="text-muted">Игр</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="fw-bold text-primary">{{ stats.total_developers|intcomma }}</h3>
+                <p class="text-muted">Разработчиков</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="fw-bold text-primary">{{ stats.total_downloads|intcomma }}</h3>
+                <p class="text-muted">Скачиваний</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="fw-bold text-primary">{{ stats.total_reviews|intcomma }}</h3>
+                <p class="text-muted">Отзывов</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Рекомендуемые игры -->
+    {% if featured_games %}
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Рекомендуемые игры</h2>
+            <a href="{% url 'games:list' %}" class="btn btn-outline-primary">Смотреть все</a>
+        </div>
+        <div class="row">
+            {% for game in featured_games %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if game.cover_image %}
+                        <img src="{{ game.cover_image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ game.title }}</h5>
+                        <p class="card-text text-muted">{{ game.short_description|truncatechars:100 }}</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ game.developer.username }}</small>
+                                <span class="badge bg-primary">{% if game.is_free %}Бесплатно{% else %}{{ game.price }} ₽{% endif %}</span>
+                            </div>
+                            <a href="{{ game.get_absolute_url }}" class="btn btn-primary w-100 mt-2">Подробнее</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- Новые игры -->
+    {% if new_games %}
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Новые игры</h2>
+            <a href="{% url 'games:list' %}?sort=-created_at" class="btn btn-outline-primary">Смотреть все</a>
+        </div>
+        <div class="row">
+            {% for game in new_games %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                <div class="card h-100">
+                    {% if game.cover_image %}
+                        <img src="{{ game.cover_image.url }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="card-title">{{ game.title|truncatechars:30 }}</h6>
+                        <small class="text-muted d-block">{{ game.developer.username }}</small>
+                        <div class="mt-2">
+                            <span class="badge bg-{% if game.is_free %}success{% else %}primary{% endif %}">
+                                {% if game.is_free %}Бесплатно{% else %}{{ game.price }} ₽{% endif %}
+                            </span>
+                        </div>
+                        <a href="{{ game.get_absolute_url }}" class="btn btn-sm btn-outline-primary w-100 mt-2">Смотреть</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- Популярные игры и бесплатные игры -->
+    <div class="row mb-5">
+        <!-- Популярные игры -->
+        {% if popular_games %}
+        <div class="col-lg-6">
+            <h3 class="fw-bold mb-3">Популярные игры</h3>
+            {% for game in popular_games|slice:":5" %}
+            <div class="card mb-2">
+                <div class="card-body py-2">
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            {% if game.cover_image %}
+                                <img src="{{ game.cover_image.url }}" class="img-fluid rounded" style="height: 60px; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="col-7">
+                            <h6 class="mb-0">{{ game.title|truncatechars:25 }}</h6>
+                            <small class="text-muted">{{ game.developer.username }}</small>
+                            <div>
+                                <small class="text-success">
+                                    <i class="fas fa-download"></i> {{ game.download_count|intcomma }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-2 text-end">
+                            <a href="{{ game.get_absolute_url }}" class="btn btn-sm btn-outline-primary">></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <a href="{% url 'games:list' %}?sort=-download_count" class="btn btn-outline-primary w-100">Все популярные</a>
+        </div>
+        {% endif %}
+        
+        <!-- Бесплатные игры -->
+        {% if free_games %}
+        <div class="col-lg-6">
+            <h3 class="fw-bold mb-3">Бесплатные игры</h3>
+            {% for game in free_games|slice:":5" %}
+            <div class="card mb-2">
+                <div class="card-body py-2">
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            {% if game.cover_image %}
+                                <img src="{{ game.cover_image.url }}" class="img-fluid rounded" style="height: 60px; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="col-7">
+                            <h6 class="mb-0">{{ game.title|truncatechars:25 }}</h6>
+                            <small class="text-muted">{{ game.developer.username }}</small>
+                            <div>
+                                <span class="badge bg-success">Бесплатно</span>
+                            </div>
+                        </div>
+                        <div class="col-2 text-end">
+                            <a href="{{ game.get_absolute_url }}" class="btn btn-sm btn-outline-primary">></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <a href="{% url 'games:list' %}?price_filter=free" class="btn btn-outline-success w-100">Все бесплатные</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Жанры -->
+    {% if genres %}
+    <section class="mb-5">
+        <h2 class="fw-bold mb-4">Популярные жанры</h2>
+        <div class="row">
+            {% for genre in genres %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                <a href="{% url 'games:genre_detail' genre.slug %}" class="text-decoration-none">
+                    <div class="card border-0 bg-light h-100 text-center py-3">
+                        <div class="card-body">
+                            <h5 class="text-primary">{{ genre.name }}</h5>
+                            <p class="text-muted mb-0">{{ genre.games_count }} игр</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
