@@ -43,7 +43,7 @@ class Game(models.Model):
     banner_image = models.ImageField('Баннер', upload_to='games/banners/', blank=True, null=True)
     
     # Категоризация
-    genres = models.ManyToManyField(Genre, verbose_name='Жанры', blank=True)
+    genres = models.ManyToManyField(Genre, verbose_name='Жанры', blank=True, related_name='games')
     tags = TaggableManager(verbose_name='Теги', blank=True)
     
     # Публикация

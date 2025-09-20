@@ -28,10 +28,9 @@ class HomeView(TemplateView):
             is_published=True
         ).select_related('developer').order_by('-download_count')[:8]
         
-        # Бесплатные игры
+        # Бесплатные игры (все игры теперь бесплатные)
         context['free_games'] = Game.objects.filter(
-            is_published=True,
-            price_type='free'
+            is_published=True
         ).select_related('developer').order_by('-created_at')[:6]
         
         # Жанры

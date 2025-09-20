@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'fluffy.furrysocial.ru', 'www.fluffy.furrysocial.ru']
 
 # Application definition
 INSTALLED_APPS = [
@@ -176,6 +176,7 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_REDIRECT_EXEMPT = []
-    SECURE_SSL_REDIRECT = True
+    # SECURE_SSL_REDIRECT = True  # ОТКЛЮЧЕНО - вызывает циклы редиректов
+    SECURE_SSL_REDIRECT = False  # Пусть веб-сервер обрабатывает HTTPS
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
