@@ -82,21 +82,14 @@
                                 <li><a class="dropdown-item" href="{% url 'accounts:profile' user.username %}">Мой профиль</a></li>
                                 <li><a class="dropdown-item" href="{% url 'games:library' %}">Библиотека</a></li>
                                 <li><a class="dropdown-item" href="{% url 'games:wishlist' %}">Список желаний</a></li>
-                                <li><a class="dropdown-item" href="{% url 'payments:transaction_list' %}">Покупки</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 {% if user.is_developer %}
                                     <li><a class="dropdown-item" href="{% url 'games:my_games' %}">Мои игры</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'payments:developer_earnings' %}">Доходы</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                 {% endif %}
                                 <li><a class="dropdown-item" href="{% url 'accounts:profile_edit' %}">Настройки</a></li>
                                 <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Выйти</a></li>
                             </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'payments:cart' %}">
-                                <i class="fas fa-shopping-cart"></i>
-                            </a>
                         </li>
                     {% else %}
                         <li class="nav-item">
