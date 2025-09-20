@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Список разработчиков - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Разработчики</h2>
+        <span class="badge bg-primary fs-6">{{ developers.count }} разработчиков</span>
+    </div>
+    
+    <!-- Фильтры и поиск -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="q" class="form-control" placeholder="Поиск по имени, компании..." value="{{ query }}">
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="verified" value="true" id="verified" {% if verified_only %}checked{% endif %}>
+                        <label class="form-check-label" for="verified">
+                            Только проверенные
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Поиск</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Список разработчиков -->
+    {% if developers %}
+        <div class="row">
+            {% for developer in developers %}
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="me-3">
+                                    {% if developer.avatar %}
+                                        <img src="{{ developer.avatar.url }}" class="rounded-circle" width="60" height="60" alt="{{ developer.username }}">
+                                    {% else %}
+                                        <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                            <i class="bi bi-person-fill text-white" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        {{ developer.developer_profile.display_name }}
+                                        {% if developer.developer_profile.verified %}
+                                            <i class="bi bi-check-circle-fill text-success" title="Проверенный разработчик"></i>
+                                        {% endif %}
+                                    </h6>
+                                    <p class="text-muted mb-0">@{{ developer.username }}</p>
+                                    {% if developer.developer_profile.company %}
+                                        <small class="text-muted"><i class="bi bi-building"></i> {{ developer.developer_profile.company }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if developer.developer_profile.bio %}
+                                <p class="card-text">{{ developer.developer_profile.bio|truncatechars:120 }}</p>
+                            {% endif %}
+                            
+                            <div class="row text-center mb-3">
+                                <div class="col-4">
+                                    <strong>{{ developer.developed_games.count }}</strong><br>
+                                    <small class="text-muted">Игр</small>
+                                </div>
+                                <div class="col-4">
+                                    <strong>{{ developer.developer_profile.total_downloads|default:0 }}</strong><br>
+                                    <small class="text-muted">Скачиваний</small>
+                                </div>
+                                <div class="col-4">
+                                    <strong>{{ developer.followers_count }}</strong><br>
+                                    <small class="text-muted">Подписчиков</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'accounts:developer_profile' developer.username %}" class="btn btn-primary btn-sm flex-grow-1">Профиль</a>
+                                <a href="{% url 'accounts:profile' developer.username %}" class="btn btn-outline-secondary btn-sm">Пользователь</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-code-slash" style="font-size: 4rem; color: #ccc;"></i>
+                <h5 class="mt-3">Разработчики не найдены</h5>
+                {% if query or verified_only %}
+                    <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                    <a href="{% url 'accounts:developers_list' %}" class="btn btn-outline-primary">Очистить фильтры</a>
+                {% else %}
+                    <p class="text-muted">Пока нет зарегистрированных разработчиков</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

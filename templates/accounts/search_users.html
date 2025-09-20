@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Поиск пользователей - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Поиск пользователей</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" placeholder="Введите имя пользователя..." value="{{ query }}">
+                            <button class="btn btn-primary" type="submit">Найти</button>
+                        </div>
+                    </form>
+                    
+                    {% if query %}
+                        {% if users %}
+                            <h6>Найдено пользователей: {{ users|length }}</h6>
+                            
+                            {% for user in users %}
+                                <div class="d-flex align-items-center p-3 border-bottom">
+                                    <div class="me-3">
+                                        {% if user.avatar %}
+                                            <img src="{{ user.avatar.url }}" class="rounded-circle" width="50" height="50" alt="{{ user.username }}">
+                                        {% else %}
+                                            <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <i class="bi bi-person-fill text-white"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <a href="{% url 'accounts:profile' user.username %}" class="text-decoration-none">
+                                                {{ user.get_full_name|default:user.username }}
+                                            </a>
+                                        </h6>
+                                        <p class="text-muted mb-1">@{{ user.username }}</p>
+                                        {% if user.bio %}
+                                            <p class="mb-0 small">{{ user.bio|truncatechars:100 }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        {% if user.is_developer %}
+                                            <span class="badge bg-success me-2">Разработчик</span>
+                                        {% endif %}
+                                        <a href="{% url 'accounts:profile' user.username %}" class="btn btn-outline-primary btn-sm">Профиль</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-search" style="font-size: 3rem; color: #ccc;"></i>
+                                <h6 class="mt-3">Пользователи не найдены</h6>
+                                <p class="text-muted">Попробуйте другой запрос</p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-people" style="font-size: 3rem; color: #ccc;"></i>
+                            <h6 class="mt-3">Начните поиск</h6>
+                            <p class="text-muted">Введите имя пользователя чтобы найти его</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

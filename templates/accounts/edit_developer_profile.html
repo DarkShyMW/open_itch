@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Редактирование профиля разработчика - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Редактирование профиля разработчика</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <a href="{% url 'accounts:developer_profile' user.username %}" class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-4">
+                <h6><i class="bi bi-info-circle"></i> Полезные советы</h6>
+                <ul class="mb-0">
+                    <li>Опишите свой опыт разработки игр</li>
+                    <li>Укажите ссылку на ваш сайт или портфолио</li>
+                    <li>Добавьте контактную информацию для сотрудничества</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

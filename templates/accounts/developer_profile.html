@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ developer.developer_profile.display_name }} - Разработчик - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Шапка профиля -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    {% if developer.avatar %}
+                        <img src="{{ developer.avatar.url }}" class="rounded-circle mb-3" width="150" height="150" alt="{{ developer.username }}">
+                    {% else %}
+                        <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px;">
+                            <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-9">
+                    <h2>{{ developer_profile.display_name }}</h2>
+                    {% if developer_profile.company %}
+                        <p class="text-muted mb-2"><i class="bi bi-building"></i> {{ developer_profile.company }}</p>
+                    {% endif %}
+                    {% if developer_profile.location %}
+                        <p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> {{ developer_profile.location }}</p>
+                    {% endif %}
+                    {% if developer_profile.website %}
+                        <p class="mb-2"><i class="bi bi-globe"></i> <a href="{{ developer_profile.website }}" target="_blank">{{ developer_profile.website }}</a></p>
+                    {% endif %}
+                    
+                    {% if developer_profile.bio %}
+                        <p class="mt-3">{{ developer_profile.bio }}</p>
+                    {% endif %}
+                    
+                    <div class="row mt-3">
+                        <div class="col-sm-3">
+                            <strong>{{ games.count }}</strong><br>
+                            <small class="text-muted">Игр</small>
+                        </div>
+                        <div class="col-sm-3">
+                            <strong>{{ total_downloads|default:0 }}</strong><br>
+                            <small class="text-muted">Скачиваний</small>
+                        </div>
+                        <div class="col-sm-3">
+                            <strong>{{ developer.followers_count }}</strong><br>
+                            <small class="text-muted">Подписчиков</small>
+                        </div>
+                        <div class="col-sm-3">
+                            {% if developer_profile.verified %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Проверен</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        {% if user.is_authenticated and user != developer %}
+                            <button class="btn btn-outline-primary" onclick="toggleFollow('{{ developer.username }}')">
+                                {% if is_following %}
+                                    Отписаться
+                                {% else %}
+                                    Подписаться
+                                {% endif %}
+                            </button>
+                        {% elif user == developer %}
+                            <a href="{% url 'accounts:developer_profile_edit' %}" class="btn btn-primary">Редактировать</a>
+                        {% endif %}
+                        <a href="{% url 'accounts:profile' developer.username %}" class="btn btn-outline-secondary">Обычный профиль</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Игры разработчика -->
+    {% if games %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Игры ({{ games.count }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for game in games %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100">
+                                {% if game.cover_image %}
+                                    <img src="{{ game.cover_image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title">{{ game.title }}</h6>
+                                    <p class="card-text">{{ game.short_description|truncatechars:100 }}</p>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">
+                                                <i class="bi bi-download"></i> {{ game.download_count }}
+                                            </small>
+                                            <span class="badge bg-success">Бесплатно</span>
+                                        </div>
+                                        
+                                        {% if game.genres.all %}
+                                            <div class="mb-2">
+                                                {% for genre in game.genres.all %}
+                                                    <span class="badge bg-light text-dark me-1">{{ genre.name }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <a href="{{ game.get_absolute_url }}" class="btn btn-primary btn-sm w-100">Подробнее</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-controller" style="font-size: 3rem; color: #ccc;"></i>
+                <h5 class="mt-3">Пока нет опубликованных игр</h5>
+                {% if user == developer %}
+                    <p class="text-muted">Загрузите свою первую игру!</p>
+                    <a href="{% url 'games:create' %}" class="btn btn-primary">Добавить игру</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleFollow(username) {
+    fetch(`/accounts/follow/${username}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

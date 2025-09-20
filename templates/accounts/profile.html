@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ profile_user.get_full_name|default:profile_user.username }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        {% if profile_user.avatar %}
+                            <img src="{{ profile_user.avatar.url }}" class="rounded-circle" width="120" height="120" alt="{{ profile_user.username }}">
+                        {% else %}
+                            <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i class="bi bi-person-fill text-white" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h4>{{ profile_user.get_full_name|default:profile_user.username }}</h4>
+                    <p class="text-muted">@{{ profile_user.username }}</p>
+                    
+                    {% if profile_user.bio %}
+                        <p>{{ profile_user.bio }}</p>
+                    {% endif %}
+                    
+                    <div class="row text-center mb-3">
+                        <div class="col">
+                            <strong>{{ profile_user.followers_count }}</strong><br>
+                            <small class="text-muted">Подписчиков</small>
+                        </div>
+                        <div class="col">
+                            <strong>{{ profile_user.following_count }}</strong><br>
+                            <small class="text-muted">Подписок</small>
+                        </div>
+                    </div>
+                    
+                    {% if user.is_authenticated and user != profile_user %}
+                        <button class="btn btn-outline-primary" onclick="toggleFollow('{{ profile_user.username }}')">
+                            {% if is_following %}
+                                Отписаться
+                            {% else %}
+                                Подписаться
+                            {% endif %}
+                        </button>
+                    {% elif user == profile_user %}
+                        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">Редактировать профиль</a>
+                    {% endif %}
+                    
+                    {% if profile_user.is_developer %}
+                        <a href="{% url 'accounts:developer_profile' profile_user.username %}" class="btn btn-outline-success mt-2">Профиль разработчика</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            {% if user_games %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Игры</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for game in user_games %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        {% if game.cover_image %}
+                                            <img src="{{ game.cover_image.url }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ game.title }}</h6>
+                                            <p class="card-text small">{{ game.short_description|truncatechars:80 }}</p>
+                                            <a href="{{ game.get_absolute_url }}" class="btn btn-sm btn-primary">Подробнее</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if recent_reviews %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Последние отзывы</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for review in recent_reviews %}
+                            <div class="mb-3 border-bottom pb-3">
+                                <div class="d-flex justify-content-between">
+                                    <h6><a href="{{ review.game.get_absolute_url }}">{{ review.game.title }}</a></h6>
+                                    <small class="text-muted">{{ review.created_at|naturaltime }}</small>
+                                </div>
+                                <div class="mb-2">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= review.rating %}
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                        {% else %}
+                                            <i class="bi bi-star text-muted"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <p>{{ review.text|truncatechars:200 }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleFollow(username) {
+    fetch(`/accounts/follow/${username}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

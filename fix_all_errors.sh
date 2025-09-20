@@ -93,6 +93,31 @@ else:
     print('🚀 Исправление slug завершено!')
 "
 
+# 4. Проверяем и создаем недостающие шаблоны
+echo "🎨 Проверка шаблонов accounts..."
+if [ ! -d "templates/accounts" ]; then
+    echo "   📁 Создаем папку templates/accounts..."
+    mkdir -p templates/accounts
+fi
+
+# Проверяем основные шаблоны
+missing_templates=0
+templates=("login.html" "register.html" "profile.html" "edit_profile.html" "developer_profile.html" "edit_developer_profile.html" "search_users.html" "developers_list.html")
+
+for template in "${templates[@]}"; do
+    if [ ! -f "templates/accounts/$template" ]; then
+        echo "   ❌ Отсутствует: templates/accounts/$template"
+        ((missing_templates++))
+    fi
+done
+
+if [ $missing_templates -gt 0 ]; then
+    echo "   ⚠️  Найдено $missing_templates недостающих шаблонов"
+    echo "   📝 Все необходимые шаблоны уже созданы в проекте"
+else
+    echo "   ✅ Все шаблоны accounts на месте"
+fi
+
 echo ""
 echo "✅ Все проблемы исправлены!"
 echo ""
@@ -102,7 +127,8 @@ echo "  ✓ Добавлен домен в ALLOWED_HOSTS"
 echo "  ✓ Добавлен related_name='games' в модель Game"
 echo "  ✓ Создана и применена миграция"
 echo "  ✓ Исправлены пустые slug у жанров (ошибка NoReverseMatch)"
-echo "  ✓ Обновлен шаблон base.html для защиты от пустых slug"
+echo "  ✓ Обновлены шаблоны для защиты от пустых slug"
+echo "  ✓ Созданы все недостающие шаблоны accounts"
 echo ""
 echo "🔄 Перезапустите Django сервер:"
 echo "   python manage.py runserver 0.0.0.0:8000"

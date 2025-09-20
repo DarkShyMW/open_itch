@@ -153,6 +153,14 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://fluffy.furrysocial.ru",
+    "https://www.fluffy.furrysocial.ru",
+]
+
+# CSRF settings for production
+CSRF_TRUSTED_ORIGINS = [
+    "https://fluffy.furrysocial.ru",
+    "https://www.fluffy.furrysocial.ru",
 ]
 
 # File upload settings
