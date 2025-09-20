@@ -43,7 +43,11 @@
                         </a>
                         <ul class="dropdown-menu">
                             {% for genre in genres_menu %}
-                                <li><a class="dropdown-item" href="{% url 'games:genre_detail' genre.slug %}">{{ genre.name }}</a></li>
+                                {% if genre.slug %}
+                                    <li><a class="dropdown-item" href="{% url 'games:genre_detail' genre.slug %}">{{ genre.name }}</a></li>
+                                {% else %}
+                                    <li><span class="dropdown-item text-muted">{{ genre.name }} (без ссылки)</span></li>
+                                {% endif %}
                             {% endfor %}
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'games:genres_list' %}">Все жанры</a></li>

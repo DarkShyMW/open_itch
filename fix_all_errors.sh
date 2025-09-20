@@ -48,6 +48,35 @@ MIGRATION_EOF
 echo "🚀 Применение миграции..."
 python manage.py migrate
 
+# Исправляем пустые slug у жанров
+echo "🏷️ Исправление пустых slug у жанров..."
+python manage.py shell -c "
+import os
+import django
+from django.utils.text import slugify
+from games.models import Genre
+
+print('🔍 Поиск жанров с пустыми slug...')
+empty_slug_genres = Genre.objects.filter(slug='') | Genre.objects.filter(slug__isnull=True)
+
+if not empty_slug_genres.exists():
+    print('✅ Все жанры имеют корректные slug!')
+else:
+    print(f'📝 Найдено {empty_slug_genres.count()} жанров с пустыми slug:')
+    
+    for genre in empty_slug_genres:
+        old_slug = genre.slug or '[пусто]'
+        genre.slug = slugify(genre.name)
+        
+        try:
+            genre.save()
+            print(f'   ✅ {genre.name}: {old_slug} → {genre.slug}')
+        except Exception as e:
+            print(f'   ❌ Ошибка при сохранении {genre.name}: {e}')
+    
+    print('🚀 Исправление slug завершено!')
+"
+
 echo ""
 echo "✅ Все проблемы исправлены!"
 echo ""
@@ -56,6 +85,8 @@ echo "  ✓ Отключен SECURE_SSL_REDIRECT (исправлены 301 ре�
 echo "  ✓ Добавлен домен в ALLOWED_HOSTS"
 echo "  ✓ Добавлен related_name='games' в модель Game"
 echo "  ✓ Создана и применена миграция"
+echo "  ✓ Исправлены пустые slug у жанров (ошибка NoReverseMatch)"
+echo "  ✓ Обновлен шаблон base.html для защиты от пустых slug"
 echo ""
 echo "🔄 Перезапустите Django сервер:"
 echo "   python manage.py runserver 0.0.0.0:8000"
