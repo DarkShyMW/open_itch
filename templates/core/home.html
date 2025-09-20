@@ -192,6 +192,7 @@
         <h2 class="fw-bold mb-4">Популярные жанры</h2>
         <div class="row">
             {% for genre in genres %}
+            {% if genre.slug %}
             <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
                 <a href="{% url 'games:genre_detail' genre.slug %}" class="text-decoration-none">
                     <div class="card border-0 bg-light h-100 text-center py-3">
@@ -202,6 +203,7 @@
                     </div>
                 </a>
             </div>
+            {% endif %}
             {% endfor %}
         </div>
     </section>

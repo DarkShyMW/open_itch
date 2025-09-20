@@ -57,22 +57,38 @@ from django.utils.text import slugify
 from games.models import Genre
 
 print('🔍 Поиск жанров с пустыми slug...')
-empty_slug_genres = Genre.objects.filter(slug='') | Genre.objects.filter(slug__isnull=True)
 
-if not empty_slug_genres.exists():
+# Получаем все жанры
+all_genres = Genre.objects.all()
+problematic_genres = []
+
+for genre in all_genres:
+    if not genre.slug or genre.slug.strip() == '':
+        problematic_genres.append(genre)
+
+if not problematic_genres:
     print('✅ Все жанры имеют корректные slug!')
 else:
-    print(f'📝 Найдено {empty_slug_genres.count()} жанров с пустыми slug:')
+    print(f'📝 Найдено {len(problematic_genres)} жанров с пустыми slug:')
     
-    for genre in empty_slug_genres:
+    for genre in problematic_genres:
         old_slug = genre.slug or '[пусто]'
-        genre.slug = slugify(genre.name)
         
-        try:
-            genre.save()
-            print(f'   ✅ {genre.name}: {old_slug} → {genre.slug}')
-        except Exception as e:
-            print(f'   ❌ Ошибка при сохранении {genre.name}: {e}')
+        # Генерируем базовый slug
+        base_slug = slugify(genre.name)
+        if not base_slug:
+            base_slug = f'genre-{genre.id}'
+        
+        # Проверяем уникальность
+        new_slug = base_slug
+        counter = 1
+        while Genre.objects.filter(slug=new_slug).exclude(id=genre.id).exists():
+            new_slug = f'{base_slug}-{counter}'
+            counter += 1
+        
+        genre.slug = new_slug
+        genre.save()
+        print(f'   ✅ {genre.name}: {old_slug} → {new_slug}')
     
     print('🚀 Исправление slug завершено!')
 "
